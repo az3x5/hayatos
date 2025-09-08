@@ -23,8 +23,8 @@ export async function GET(request: NextRequest) {
 
     // Parse and validate query parameters
     const url = new URL(request.url);
-    const queryParams = Object.fromEntries(url.searchParams.entries());
-    
+    const queryParams: Record<string, any> = Object.fromEntries(url.searchParams.entries());
+
     // Convert array parameters
     if (queryParams.entity_types) {
       queryParams.entity_types = queryParams.entity_types.split(',');

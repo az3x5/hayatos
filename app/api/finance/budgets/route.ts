@@ -38,8 +38,8 @@ export async function GET(request: NextRequest) {
 
     // Parse query parameters
     const url = new URL(request.url);
-    const queryParams = Object.fromEntries(url.searchParams.entries());
-    
+    const queryParams: Record<string, any> = Object.fromEntries(url.searchParams.entries());
+
     if (queryParams.include_progress) {
       queryParams.include_progress = queryParams.include_progress === 'true';
     }
@@ -86,8 +86,8 @@ export async function GET(request: NextRequest) {
           user_uuid: session.user.id,
         });
 
-      enrichedBudgets = (budgets || []).map(budget => {
-        const progress = progressData?.find(p => p.budget_id === budget.id);
+      enrichedBudgets = (budgets || []).map((budget: any) => {
+        const progress = progressData?.find((p: any) => p.budget_id === budget.id);
         return {
           ...budget,
           progress: progress || {

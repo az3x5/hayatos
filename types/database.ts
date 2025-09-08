@@ -1280,7 +1280,7 @@ export interface PushToken {
   updated_at: string;
 }
 
-export interface NotificationType {
+export interface NotificationTypeConfig {
   id: string;
   type_key: string;
   name: string;

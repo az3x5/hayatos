@@ -125,19 +125,7 @@ export interface Account {
 
 
 
-export interface Notification {
-  id: string;
-  user_id: string;
-  type: NotificationType;
-  title: string;
-  message?: string;
-  data: Record<string, any>;
-  is_read: boolean;
-  scheduled_for?: string;
-  sent_at?: string;
-  created_at: string;
-  updated_at: string;
-}
+
 
 // API Response types
 export interface ApiResponse<T> {

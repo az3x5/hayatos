@@ -123,17 +123,7 @@ export interface Account {
 
 
 
-export interface SalatLog {
-  id: string;
-  user_id: string;
-  prayer_name: string;
-  prayer_time: string;
-  logged_at: string;
-  is_on_time: boolean;
-  location?: string;
-  created_at: string;
-  updated_at: string;
-}
+
 
 export interface Notification {
   id: string;

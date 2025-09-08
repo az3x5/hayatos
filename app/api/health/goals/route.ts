@@ -236,29 +236,29 @@ async function calculateGoalProgress(supabase: any, userId: string, goal: any) {
   switch (goal.type) {
     case 'sleep':
       // Average sleep hours
-      const totalHours = logs.reduce((sum, log) => sum + (log.value.hours || 0), 0);
+      const totalHours = logs.reduce((sum: number, log: any) => sum + (log.value.hours || 0), 0);
       currentValue = totalHours / logs.length;
       break;
     
     case 'water':
     case 'calories':
       // Sum amounts (convert to same unit if needed)
-      currentValue = logs.reduce((sum, log) => sum + (log.value.amount || 0), 0);
+      currentValue = logs.reduce((sum: number, log: any) => sum + (log.value.amount || 0), 0);
       break;
-    
+
     case 'exercise':
       // Sum duration
-      currentValue = logs.reduce((sum, log) => sum + (log.value.duration || 0), 0);
+      currentValue = logs.reduce((sum: number, log: any) => sum + (log.value.duration || 0), 0);
       break;
-    
+
     case 'steps':
       // Sum step counts
-      currentValue = logs.reduce((sum, log) => sum + (log.value.count || 0), 0);
+      currentValue = logs.reduce((sum: number, log: any) => sum + (log.value.count || 0), 0);
       break;
     
     case 'weight':
       // Latest weight
-      const sortedLogs = logs.sort((a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime());
+      const sortedLogs = logs.sort((a: any, b: any) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime());
       currentValue = sortedLogs[0]?.value.weight || 0;
       break;
     

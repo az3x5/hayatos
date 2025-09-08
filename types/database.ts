@@ -129,22 +129,7 @@ export interface Account {
   updated_at: string;
 }
 
-export interface Transaction {
-  id: string;
-  user_id: string;
-  account_id: string;
-  to_account_id?: string;
-  type: TransactionType;
-  amount: number;
-  description?: string;
-  category?: string;
-  tags: string[];
-  transaction_date: string;
-  created_at: string;
-  updated_at: string;
-  account?: Account;
-  to_account?: Account;
-}
+
 
 export interface Budget {
   id: string;
@@ -260,21 +245,7 @@ export interface QuranVerse {
   created_at: string;
 }
 
-export interface Hadith {
-  id: string;
-  collection: string;
-  book_number?: number;
-  book_name?: string;
-  hadith_number: string;
-  chapter?: string;
-  hadith_text_arabic?: string;
-  hadith_text_english: string;
-  narrator?: string;
-  grade?: string;
-  reference?: string;
-  embedding?: number[];
-  created_at: string;
-}
+
 
 export interface Dua {
   id: string;

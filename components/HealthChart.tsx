@@ -32,7 +32,7 @@ export default function HealthChart({
       return {
         chartData: [],
         stats: { min: 0, max: 0, avg: 0, latest: 0, trend: 'stable' as const },
-        dimensions: { width: 400, height: 200 },
+        dimensions: { width: 400, height: 200, padding: 40, chartWidth: 320, chartHeight: 120 },
       };
     }
 

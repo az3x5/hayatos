@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
 
     // Order by priority and due date
     query = query.order('priority', { ascending: false })
-                 .order('due_date', { ascending: true, nullsLast: true })
+                 .order('due_date', { ascending: true, nullsFirst: false })
                  .order('created_at', { ascending: false });
 
     const { data: tasks, error, count } = await query;

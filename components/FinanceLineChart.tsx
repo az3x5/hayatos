@@ -30,7 +30,7 @@ export default function FinanceLineChart({
       return {
         chartData: [],
         stats: { min: 0, max: 0, avg: 0, trend: 'stable' as const },
-        dimensions: { width: 600, height: 300 },
+        dimensions: { width: 600, height: 300, padding: 60, chartWidth: 480, chartHeight: 180 },
       };
     }
 

@@ -1,5 +1,4 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createSupabaseRouteHandlerClient } from '@/lib/supabase-server';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -25,7 +24,7 @@ const bookmarkSchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
+    const supabase = await createSupabaseRouteHandlerClient();
     
     // Check authentication
     const { data: { session }, error: authError } = await supabase.auth.getSession();
@@ -99,7 +98,7 @@ export async function GET(request: NextRequest) {
 // Create or update bookmark
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
+    const supabase = await createSupabaseRouteHandlerClient();
     
     // Check authentication
     const { data: { session }, error: authError } = await supabase.auth.getSession();

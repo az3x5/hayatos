@@ -1,5 +1,4 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createSupabaseRouteHandlerClient } from '@/lib/supabase-server';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -13,11 +12,12 @@ const checkinSchema = z.object({
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
-    
+    const supabase = await createSupabaseRouteHandlerClient();
+    const { id } = await params;
+
     // Check authentication
     const { data: { session }, error: authError } = await supabase.auth.getSession();
     if (authError || !session) {
@@ -25,7 +25,7 @@ export async function POST(
     }
 
     // Validate habit ID
-    if (!z.string().uuid().safeParse(params.id).success) {
+    if (!z.string().uuid().safeParse(id).success) {
       return NextResponse.json({ error: 'Invalid habit ID' }, { status: 400 });
     }
 
@@ -37,7 +37,7 @@ export async function POST(
     const { data: habit, error: habitError } = await supabase
       .from('habits')
       .select('id, title, target_value, cadence')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', session.user.id)
       .eq('is_active', true)
       .single();
@@ -54,7 +54,7 @@ export async function POST(
       const { data: existingLog } = await supabase
         .from('habit_logs')
         .select('id, value')
-        .eq('habit_id', params.id)
+        .eq('habit_id', id)
         .eq('user_id', session.user.id)
         .gte('logged_at', logDate)
         .lt('logged_at', new Date(new Date(logDate).getTime() + 24 * 60 * 60 * 1000).toISOString())
@@ -90,7 +90,7 @@ export async function POST(
     const { data: habitLog, error } = await supabase
       .from('habit_logs')
       .insert({
-        habit_id: params.id,
+        habit_id: id,
         user_id: session.user.id,
         value: validatedData.value,
         notes: validatedData.notes,
@@ -129,7 +129,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
+    const supabase = await createSupabaseRouteHandlerClient();
     
     // Check authentication
     const { data: { session }, error: authError } = await supabase.auth.getSession();
@@ -138,7 +138,7 @@ export async function GET(
     }
 
     // Validate habit ID
-    if (!z.string().uuid().safeParse(params.id).success) {
+    if (!z.string().uuid().safeParse(id).success) {
       return NextResponse.json({ error: 'Invalid habit ID' }, { status: 400 });
     }
 
@@ -152,7 +152,7 @@ export async function GET(
     const { data: habit, error: habitError } = await supabase
       .from('habits')
       .select('id, title')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', session.user.id)
       .single();
 
@@ -164,7 +164,7 @@ export async function GET(
     let query = supabase
       .from('habit_logs')
       .select('*')
-      .eq('habit_id', params.id)
+      .eq('habit_id', id)
       .eq('user_id', session.user.id);
 
     // Apply date filters

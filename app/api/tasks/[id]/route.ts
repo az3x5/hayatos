@@ -1,5 +1,4 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createSupabaseRouteHandlerClient } from '@/lib/supabase-server';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -19,11 +18,12 @@ const updateTaskSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
-    
+    const supabase = await createSupabaseRouteHandlerClient();
+    const { id } = await params;
+
     // Check authentication
     const { data: { session }, error: authError } = await supabase.auth.getSession();
     if (authError || !session) {
@@ -31,7 +31,7 @@ export async function GET(
     }
 
     // Validate task ID
-    if (!z.string().uuid().safeParse(params.id).success) {
+    if (!z.string().uuid().safeParse(id).success) {
       return NextResponse.json({ error: 'Invalid task ID' }, { status: 400 });
     }
 
@@ -48,7 +48,7 @@ export async function GET(
           id, title, status
         )
       `)
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', session.user.id)
       .single();
 
@@ -66,10 +66,11 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
+    const supabase = await createSupabaseRouteHandlerClient();
+    const { id } = await params;
     
     // Check authentication
     const { data: { session }, error: authError } = await supabase.auth.getSession();
@@ -78,7 +79,7 @@ export async function PUT(
     }
 
     // Validate task ID
-    if (!z.string().uuid().safeParse(params.id).success) {
+    if (!z.string().uuid().safeParse(id).success) {
       return NextResponse.json({ error: 'Invalid task ID' }, { status: 400 });
     }
 
@@ -90,7 +91,7 @@ export async function PUT(
     const { data: existingTask, error: fetchError } = await supabase
       .from('tasks')
       .select('id, status, due_date')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', session.user.id)
       .single();
 
@@ -140,7 +141,7 @@ export async function PUT(
     const { data: task, error } = await supabase
       .from('tasks')
       .update(updateData)
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', session.user.id)
       .select(`
         *,
@@ -160,7 +161,7 @@ export async function PUT(
         const { data: existingEvent } = await supabase
           .from('events')
           .select('id')
-          .eq('linked_task_id', params.id)
+          .eq('linked_task_id', id)
           .single();
 
         if (existingEvent) {
@@ -187,7 +188,7 @@ export async function PUT(
         await supabase
           .from('events')
           .delete()
-          .eq('linked_task_id', params.id);
+          .eq('linked_task_id', id);
       }
     }
 
@@ -204,10 +205,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
+    const supabase = await createSupabaseRouteHandlerClient();
+    const { id } = await params;
     
     // Check authentication
     const { data: { session }, error: authError } = await supabase.auth.getSession();
@@ -216,7 +218,7 @@ export async function DELETE(
     }
 
     // Validate task ID
-    if (!z.string().uuid().safeParse(params.id).success) {
+    if (!z.string().uuid().safeParse(id).success) {
       return NextResponse.json({ error: 'Invalid task ID' }, { status: 400 });
     }
 
@@ -224,7 +226,7 @@ export async function DELETE(
     const { data: existingTask, error: fetchError } = await supabase
       .from('tasks')
       .select('id')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', session.user.id)
       .single();
 
@@ -236,13 +238,13 @@ export async function DELETE(
     await supabase
       .from('events')
       .delete()
-      .eq('linked_task_id', params.id);
+      .eq('linked_task_id', id);
 
     // Delete task (this will cascade delete subtasks due to foreign key constraint)
     const { error } = await supabase
       .from('tasks')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', session.user.id);
 
     if (error) {

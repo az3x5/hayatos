@@ -1,5 +1,4 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createSupabaseRouteHandlerClient } from '@/lib/supabase-server';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -16,11 +15,12 @@ const updateNoteSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
-    
+    const supabase = await createSupabaseRouteHandlerClient();
+    const { id } = await params;
+
     // Check authentication
     const { data: { session }, error: authError } = await supabase.auth.getSession();
     if (authError || !session) {
@@ -28,7 +28,7 @@ export async function GET(
     }
 
     // Validate note ID
-    if (!z.string().uuid().safeParse(params.id).success) {
+    if (!z.string().uuid().safeParse(id).success) {
       return NextResponse.json({ error: 'Invalid note ID' }, { status: 400 });
     }
 
@@ -46,7 +46,7 @@ export async function GET(
           entity:entities(id, name, type, description)
         )
       `)
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', session.user.id)
       .single();
 
@@ -57,7 +57,7 @@ export async function GET(
     // Get related notes through knowledge graph
     const { data: relatedNotes } = await supabase
       .rpc('find_related_notes_by_entities', {
-        note_uuid: params.id,
+        note_uuid: id,
         user_uuid: session.user.id,
         max_results: 5,
       });
@@ -77,10 +77,11 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
+    const supabase = await createSupabaseRouteHandlerClient();
+    const { id } = await params;
     
     // Check authentication
     const { data: { session }, error: authError } = await supabase.auth.getSession();
@@ -89,7 +90,7 @@ export async function PUT(
     }
 
     // Validate note ID
-    if (!z.string().uuid().safeParse(params.id).success) {
+    if (!z.string().uuid().safeParse(id).success) {
       return NextResponse.json({ error: 'Invalid note ID' }, { status: 400 });
     }
 
@@ -101,7 +102,7 @@ export async function PUT(
     const { data: existingNote, error: fetchError } = await supabase
       .from('notes')
       .select('id, content')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', session.user.id)
       .single();
 
@@ -147,7 +148,7 @@ export async function PUT(
     const { data: note, error } = await supabase
       .from('notes')
       .update(updateData)
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', session.user.id)
       .select(`
         *,
@@ -163,7 +164,7 @@ export async function PUT(
 
     // Trigger AI processing if content changed
     if (validatedData.content && validatedData.content !== existingNote.content) {
-      processNoteWithAI(params.id, validatedData.content).catch(console.error);
+      processNoteWithAI(id, validatedData.content).catch(console.error);
     }
 
     return NextResponse.json({ data: note });
@@ -179,10 +180,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
+    const supabase = await createSupabaseRouteHandlerClient();
+    const { id } = await params;
     
     // Check authentication
     const { data: { session }, error: authError } = await supabase.auth.getSession();
@@ -191,7 +193,7 @@ export async function DELETE(
     }
 
     // Validate note ID
-    if (!z.string().uuid().safeParse(params.id).success) {
+    if (!z.string().uuid().safeParse(id).success) {
       return NextResponse.json({ error: 'Invalid note ID' }, { status: 400 });
     }
 
@@ -199,7 +201,7 @@ export async function DELETE(
     const { data: existingNote, error: fetchError } = await supabase
       .from('notes')
       .select('id')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', session.user.id)
       .single();
 
@@ -211,7 +213,7 @@ export async function DELETE(
     const { error } = await supabase
       .from('notes')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', session.user.id);
 
     if (error) {

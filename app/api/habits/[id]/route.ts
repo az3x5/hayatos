@@ -1,5 +1,4 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createSupabaseRouteHandlerClient } from '@/lib/supabase-server';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -19,11 +18,12 @@ const updateHabitSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
-    
+    const supabase = await createSupabaseRouteHandlerClient();
+    const { id } = await params;
+
     // Check authentication
     const { data: { session }, error: authError } = await supabase.auth.getSession();
     if (authError || !session) {
@@ -31,7 +31,7 @@ export async function GET(
     }
 
     // Validate habit ID
-    if (!z.string().uuid().safeParse(params.id).success) {
+    if (!z.string().uuid().safeParse(id).success) {
       return NextResponse.json({ error: 'Invalid habit ID' }, { status: 400 });
     }
 
@@ -39,7 +39,7 @@ export async function GET(
     const { data: habit, error } = await supabase
       .from('habits')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', session.user.id)
       .single();
 
@@ -50,7 +50,7 @@ export async function GET(
     // Get habit statistics
     const { data: streakData } = await supabase
       .rpc('calculate_habit_streak', {
-        habit_uuid: params.id,
+        habit_uuid: id,
         user_uuid: session.user.id,
       });
 
@@ -58,7 +58,7 @@ export async function GET(
     const { data: recentLogs } = await supabase
       .from('habit_logs')
       .select('*')
-      .eq('habit_id', params.id)
+      .eq('habit_id', id)
       .eq('user_id', session.user.id)
       .gte('logged_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
       .order('logged_at', { ascending: false });
@@ -66,7 +66,7 @@ export async function GET(
     // Get heatmap data for the last year
     const { data: heatmapData } = await supabase
       .rpc('get_habit_heatmap_data', {
-        habit_uuid: params.id,
+        habit_uuid: id,
         user_uuid: session.user.id,
       });
 
@@ -92,10 +92,11 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
+    const supabase = await createSupabaseRouteHandlerClient();
+    const { id } = await params;
     
     // Check authentication
     const { data: { session }, error: authError } = await supabase.auth.getSession();
@@ -104,7 +105,7 @@ export async function PUT(
     }
 
     // Validate habit ID
-    if (!z.string().uuid().safeParse(params.id).success) {
+    if (!z.string().uuid().safeParse(id).success) {
       return NextResponse.json({ error: 'Invalid habit ID' }, { status: 400 });
     }
 
@@ -116,7 +117,7 @@ export async function PUT(
     const { data: existingHabit, error: fetchError } = await supabase
       .from('habits')
       .select('id')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', session.user.id)
       .single();
 
@@ -128,7 +129,7 @@ export async function PUT(
     const { data: habit, error } = await supabase
       .from('habits')
       .update(validatedData)
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', session.user.id)
       .select()
       .single();
@@ -151,10 +152,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
+    const supabase = await createSupabaseRouteHandlerClient();
+    const { id } = await params;
     
     // Check authentication
     const { data: { session }, error: authError } = await supabase.auth.getSession();
@@ -163,7 +165,7 @@ export async function DELETE(
     }
 
     // Validate habit ID
-    if (!z.string().uuid().safeParse(params.id).success) {
+    if (!z.string().uuid().safeParse(id).success) {
       return NextResponse.json({ error: 'Invalid habit ID' }, { status: 400 });
     }
 
@@ -171,7 +173,7 @@ export async function DELETE(
     const { data: existingHabit, error: fetchError } = await supabase
       .from('habits')
       .select('id')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', session.user.id)
       .single();
 
@@ -183,7 +185,7 @@ export async function DELETE(
     const { error } = await supabase
       .from('habits')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', session.user.id);
 
     if (error) {

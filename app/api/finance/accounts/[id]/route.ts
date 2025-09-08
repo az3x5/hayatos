@@ -1,5 +1,4 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createSupabaseRouteHandlerClient } from '@/lib/supabase-server';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -19,11 +18,12 @@ const updateAccountSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
-    
+    const supabase = await createSupabaseRouteHandlerClient();
+    const { id } = await params;
+
     // Check authentication
     const { data: { session }, error: authError } = await supabase.auth.getSession();
     if (authError || !session) {
@@ -31,7 +31,7 @@ export async function GET(
     }
 
     // Validate account ID
-    if (!z.string().uuid().safeParse(params.id).success) {
+    if (!z.string().uuid().safeParse(id).success) {
       return NextResponse.json({ error: 'Invalid account ID' }, { status: 400 });
     }
 
@@ -50,7 +50,7 @@ export async function GET(
           financial_categories(name, color, icon)
         )
       `)
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', session.user.id)
       .single();
 
@@ -70,7 +70,7 @@ export async function GET(
         is_pending,
         financial_categories(name, color, icon)
       `)
-      .eq('account_id', params.id)
+      .eq('account_id', id)
       .eq('user_id', session.user.id)
       .order('transaction_date', { ascending: false })
       .limit(10);
@@ -78,7 +78,7 @@ export async function GET(
     // Calculate account statistics
     const { data: stats } = await supabase
       .rpc('get_account_statistics', {
-        account_uuid: params.id,
+        account_uuid: id,
         user_uuid: session.user.id,
       });
 
@@ -106,10 +106,11 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
+    const supabase = await createSupabaseRouteHandlerClient();
+    const { id } = await params;
     
     // Check authentication
     const { data: { session }, error: authError } = await supabase.auth.getSession();
@@ -118,7 +119,7 @@ export async function PUT(
     }
 
     // Validate account ID
-    if (!z.string().uuid().safeParse(params.id).success) {
+    if (!z.string().uuid().safeParse(id).success) {
       return NextResponse.json({ error: 'Invalid account ID' }, { status: 400 });
     }
 
@@ -130,7 +131,7 @@ export async function PUT(
     const { data: existingAccount, error: fetchError } = await supabase
       .from('financial_accounts')
       .select('id, name')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', session.user.id)
       .single();
 
@@ -145,7 +146,7 @@ export async function PUT(
         .select('id')
         .eq('user_id', session.user.id)
         .eq('name', validatedData.name)
-        .neq('id', params.id)
+        .neq('id', id)
         .single();
 
       if (duplicateAccount) {
@@ -157,7 +158,7 @@ export async function PUT(
     const { data: account, error } = await supabase
       .from('financial_accounts')
       .update(validatedData)
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', session.user.id)
       .select()
       .single();
@@ -187,10 +188,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
+    const supabase = await createSupabaseRouteHandlerClient();
+    const { id } = await params;
     
     // Check authentication
     const { data: { session }, error: authError } = await supabase.auth.getSession();
@@ -199,7 +201,7 @@ export async function DELETE(
     }
 
     // Validate account ID
-    if (!z.string().uuid().safeParse(params.id).success) {
+    if (!z.string().uuid().safeParse(id).success) {
       return NextResponse.json({ error: 'Invalid account ID' }, { status: 400 });
     }
 
@@ -207,7 +209,7 @@ export async function DELETE(
     const { data: existingAccount, error: fetchError } = await supabase
       .from('financial_accounts')
       .select('id')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', session.user.id)
       .single();
 
@@ -219,7 +221,7 @@ export async function DELETE(
     const { data: transactions, error: transactionError } = await supabase
       .from('transactions')
       .select('id')
-      .eq('account_id', params.id)
+      .eq('account_id', id)
       .limit(1);
 
     if (transactionError) {
@@ -232,7 +234,7 @@ export async function DELETE(
       const { error: deactivateError } = await supabase
         .from('financial_accounts')
         .update({ is_active: false, is_hidden: true })
-        .eq('id', params.id)
+        .eq('id', id)
         .eq('user_id', session.user.id);
 
       if (deactivateError) {
@@ -249,7 +251,7 @@ export async function DELETE(
     const { error } = await supabase
       .from('financial_accounts')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', session.user.id);
 
     if (error) {

@@ -126,10 +126,11 @@ export async function POST(
 // Get check-in history for a habit
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createSupabaseRouteHandlerClient();
+    const { id } = await params;
     
     // Check authentication
     const { data: { session }, error: authError } = await supabase.auth.getSession();

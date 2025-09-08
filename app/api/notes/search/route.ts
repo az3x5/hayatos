@@ -226,8 +226,8 @@ async function searchNotes(
         });
 
         // Filter out results already found by semantic search (if hybrid)
-        const newResults = options.search_type === 'hybrid' 
-          ? scoredResults.filter(kr => !results.some(sr => sr.id === kr.id))
+        const newResults = options.search_type === 'hybrid'
+          ? scoredResults.filter((kr: any) => !results.some((sr: any) => sr.id === kr.id))
           : scoredResults;
 
         results.push(...newResults);

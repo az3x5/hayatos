@@ -170,13 +170,14 @@ async function handleGetSecurityInfo(supabase: any, user: any) {
 
 async function handleGetDataSummary(supabase: any, userId: string) {
   // Get data counts from various tables
-  const dataSummary = {
-    profile: 0,
+  const dataSummary: Record<string, any> = {
+    notes: 0,
     tasks: 0,
     habits: 0,
     finance: 0,
     faith: 0,
     health: 0,
+    profile: 0,
     total_records: 0,
     storage_used: '0 MB',
     account_age_days: 0

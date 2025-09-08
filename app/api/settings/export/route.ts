@@ -241,7 +241,7 @@ async function handlePreviewExport(supabase: any, request: NextRequest, userId: 
   const validatedData = exportRequestSchema.parse(body);
 
   // Generate preview of what will be exported
-  const preview = {
+  const preview: Record<string, any> = {
     estimated_size: '0 MB',
     estimated_records: 0,
     modules_included: [],
@@ -260,7 +260,7 @@ async function handlePreviewExport(supabase: any, request: NextRequest, userId: 
   };
 
   let totalRecords = 0;
-  const modulesIncluded = [];
+  const modulesIncluded: any[] = [];
 
   for (const module of validatedData.modules) {
     if (module === 'all') {

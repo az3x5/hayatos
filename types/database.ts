@@ -105,17 +105,7 @@ export interface Habit {
   updated_at: string;
 }
 
-export interface HealthLog {
-  id: string;
-  user_id: string;
-  metric_type: string;
-  value: number;
-  unit: string;
-  notes?: string;
-  logged_at: string;
-  created_at: string;
-  updated_at: string;
-}
+
 
 export interface Account {
   id: string;
@@ -131,19 +121,7 @@ export interface Account {
 
 
 
-export interface Budget {
-  id: string;
-  user_id: string;
-  name: string;
-  category: string;
-  amount: number;
-  period: string;
-  start_date: string;
-  end_date?: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
+
 
 export interface SalatLog {
   id: string;

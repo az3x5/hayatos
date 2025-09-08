@@ -357,7 +357,7 @@ export default function NotesDashboard() {
           <div className="h-full p-6">
             <MarkdownEditor
               note={selectedNote || undefined}
-              onSave={selectedNote ? handleUpdateNote : handleCreateNote}
+              onSave={(data: any) => selectedNote ? handleUpdateNote(data) : handleCreateNote(data)}
               onCancel={() => setActiveView('list')}
               autoSave={true}
             />

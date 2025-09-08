@@ -151,7 +151,7 @@ export default function ProfileSettings() {
         throw new Error(result.error || 'Failed to remove avatar');
       }
 
-      setProfile(prev => prev ? { ...prev, avatar_url: null } : null);
+      setProfile(prev => prev ? { ...prev, avatar_url: undefined } : null);
       setSuccessMessage('Avatar removed successfully');
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {

@@ -94,8 +94,8 @@ export async function GET(request: NextRequest) {
     const stats = {
       total_entities: limitedEntities.length,
       total_relationships: relationships.length,
-      entity_types: [...new Set(limitedEntities.map((e: any) => e.entity_type))],
-      relationship_types: [...new Set(relationships.map((r: any) => r.relationship_type))],
+      entity_types: Array.from(new Set(limitedEntities.map((e: any) => e.entity_type))),
+      relationship_types: Array.from(new Set(relationships.map((r: any) => r.relationship_type))),
       avg_connections: limitedEntities.length > 0 
         ? limitedEntities.reduce((sum: number, e: any) => sum + e.connection_count, 0) / limitedEntities.length 
         : 0,

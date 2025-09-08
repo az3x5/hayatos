@@ -159,7 +159,7 @@ export default function MarkdownEditor({
     if (type === 'excerpt' && aiSuggestions.excerpt) {
       updateState({ excerpt: aiSuggestions.excerpt });
     } else if (type === 'tags' && aiSuggestions.tags) {
-      const newTags = [...new Set([...state.tags, ...aiSuggestions.tags])];
+      const newTags = Array.from(new Set([...state.tags, ...aiSuggestions.tags]));
       updateState({ tags: newTags });
     }
   }, [aiSuggestions, state.tags, updateState]);
@@ -355,7 +355,7 @@ export default function MarkdownEditor({
           onChange={handleContentChange}
           preview="edit"
           hideToolbar={false}
-          visibleDragBar={false}
+          visibleDragbar={false}
           height="100%"
         />
       </div>

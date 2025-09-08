@@ -27,8 +27,8 @@ export async function GET(request: NextRequest) {
     
     // Parse query parameters
     const url = new URL(request.url);
-    const queryParams = Object.fromEntries(url.searchParams.entries());
-    
+    const queryParams: Record<string, any> = Object.fromEntries(url.searchParams.entries());
+
     // Convert numeric parameters
     ['page', 'limit'].forEach(param => {
       if (queryParams[param]) {
@@ -204,7 +204,7 @@ async function handleGetCategories(supabase: any, type: string) {
   }
 
   // Extract unique categories
-  const categories = [...new Set((data || []).map(item => item.category))].sort();
+  const categories = Array.from(new Set((data || []).map((item: any) => item.category))).sort();
 
   return NextResponse.json({ data: categories });
 }

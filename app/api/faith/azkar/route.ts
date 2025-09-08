@@ -143,7 +143,7 @@ async function handleGetAzkarTypes(supabase: any) {
   }
 
   // Extract unique types
-  const uniqueTypes = [...new Set((types || []).map(item => item.type))].sort();
+  const uniqueTypes = Array.from(new Set((types || []).map((item: any) => item.type))).sort();
 
   return NextResponse.json({ data: uniqueTypes });
 }

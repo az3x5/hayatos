@@ -29,8 +29,8 @@ export async function GET(request: NextRequest) {
     
     // Parse query parameters
     const url = new URL(request.url);
-    const queryParams = Object.fromEntries(url.searchParams.entries());
-    
+    const queryParams: Record<string, any> = Object.fromEntries(url.searchParams.entries());
+
     // Convert numeric parameters
     ['surah_id', 'verse_start', 'verse_end', 'page', 'limit'].forEach(param => {
       if (queryParams[param]) {
@@ -133,7 +133,7 @@ async function handleGetVerses(supabase: any, query: any) {
   }
 
   // Filter translation fields based on request
-  const filteredVerses = (verses || []).map(verse => {
+  const filteredVerses = (verses || []).map((verse: any) => {
     const filtered: any = {
       id: verse.id,
       verse_number: verse.verse_number,
@@ -216,7 +216,7 @@ async function handleSearchVerses(supabase: any, query: any) {
   }
 
   // Filter translation fields based on request
-  const filteredVerses = (verses || []).map(verse => {
+  const filteredVerses = (verses || []).map((verse: any) => {
     const filtered: any = {
       id: verse.id,
       surah_id: verse.surah_id,

@@ -35,8 +35,8 @@ export async function GET(request: NextRequest) {
 
     // Parse and validate query parameters
     const url = new URL(request.url);
-    const queryParams = Object.fromEntries(url.searchParams.entries());
-    
+    const queryParams: Record<string, any> = Object.fromEntries(url.searchParams.entries());
+
     // Convert numeric parameters
     ['surah_number', 'juz_number', 'page', 'limit'].forEach(param => {
       if (queryParams[param]) {
@@ -180,7 +180,7 @@ async function searchQuran(supabase: any, query: any) {
   }
 
   return {
-    data: (data || []).map(item => ({ ...item, content_type: 'quran' })),
+    data: (data || []).map((item: any) => ({ ...item, content_type: 'quran' })),
     count: count || 0,
   };
 }
@@ -220,7 +220,7 @@ async function searchHadith(supabase: any, query: any) {
   }
 
   return {
-    data: (data || []).map(item => ({ ...item, content_type: 'hadith' })),
+    data: (data || []).map((item: any) => ({ ...item, content_type: 'hadith' })),
     count: count || 0,
   };
 }
@@ -256,7 +256,7 @@ async function searchDuas(supabase: any, query: any) {
   }
 
   return {
-    data: (data || []).map(item => ({ ...item, content_type: 'duas' })),
+    data: (data || []).map((item: any) => ({ ...item, content_type: 'duas' })),
     count: count || 0,
   };
 }

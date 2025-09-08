@@ -205,7 +205,7 @@ function calculateCashFlowInsights(cashFlowData: any[]) {
 
 // Helper function to generate financial alerts
 function generateFinancialAlerts(budgetData: any[], recurringData: any[]) {
-  const alerts = [];
+  const alerts: any[] = [];
 
   // Budget alerts
   budgetData.forEach(budget => {
@@ -241,8 +241,8 @@ function generateFinancialAlerts(budgetData: any[], recurringData: any[]) {
     }
   });
 
-  return alerts.sort((a, b) => {
-    const severityOrder = { high: 3, medium: 2, low: 1 };
+  return alerts.sort((a: any, b: any) => {
+    const severityOrder: Record<string, number> = { high: 3, medium: 2, low: 1 };
     return severityOrder[b.severity] - severityOrder[a.severity];
   });
 }

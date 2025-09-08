@@ -43,8 +43,8 @@ export async function GET(request: NextRequest) {
 
     // Parse and validate query parameters
     const url = new URL(request.url);
-    const queryParams = Object.fromEntries(url.searchParams.entries());
-    
+    const queryParams: Record<string, any> = Object.fromEntries(url.searchParams.entries());
+
     // Convert numeric parameters
     ['page', 'limit', 'min_amount', 'max_amount'].forEach(param => {
       if (queryParams[param]) {
